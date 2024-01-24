@@ -5,6 +5,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import 'dart:math' show cos, sqrt, asin;
 
@@ -16,6 +17,7 @@ class MapViewPage extends StatefulWidget {
 class _MapViewPageState extends State<MapViewPage> {
   CameraPosition _initialLocation = CameraPosition(target: LatLng(0.0, 0.0));
   late GoogleMapController mapController;
+  late String _mapStyle;
 
   late Position _currentPosition;
   String _currentAddress = '';
@@ -117,7 +119,9 @@ class _MapViewPageState extends State<MapViewPage> {
           title: 'Inicial $startCoordinatesString',
           snippet: _startAddress,
         ),
-        icon: BitmapDescriptor.defaultMarker,
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueRed,
+        ),
       );
 
       // Marcador de localização do destino
@@ -256,6 +260,9 @@ class _MapViewPageState extends State<MapViewPage> {
   @override
   void initState() {
     super.initState();
+    rootBundle.loadString('assets/map_style.txt').then((string) {
+      _mapStyle = string;
+    });
     //Ao iniciar busca a lattitude e longitude inicial
     // e a patir delas sera o endereço atual
     _getCurrentLocation();
@@ -284,6 +291,7 @@ class _MapViewPageState extends State<MapViewPage> {
               polylines: Set<Polyline>.of(polylines.values),
               onMapCreated: (GoogleMapController controller) {
                 mapController = controller;
+                mapController.setMapStyle(_mapStyle);
               },
             ),
             // Bottões de zoom
